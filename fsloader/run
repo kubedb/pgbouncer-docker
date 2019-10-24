@@ -1,0 +1,3 @@
+#!/bin/sh -e
+echo "Running fsloader"
+exec /fsloader/run_fsloader.sh
