@@ -1,5 +1,5 @@
 FROM alpine:3.8
-ARG PGBOUNCER_VERSION=1.9.0
+ARG PGBOUNCER_VERSION=1.10.0
 RUN apk add --no-cache libevent openssl c-ares \
     && apk add --no-cache --virtual .build-deps git build-base automake libtool m4 autoconf libevent-dev openssl-dev c-ares-dev \
     && wget https://pgbouncer.github.io/downloads/files/$PGBOUNCER_VERSION/pgbouncer-$PGBOUNCER_VERSION.tar.gz \
