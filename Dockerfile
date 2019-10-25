@@ -11,19 +11,22 @@ RUN apk add --no-cache libevent openssl c-ares \
     && make install \
     && cd .. \
     && rm -Rf pgbouncer-$PGBOUNCER_VERSION* \
-    && apk del .build-deps
-RUN apk add --no-cache postgresql-client
+    && wget -O fsloader https://github.com/appscode/fsloader/releases/download/0.1.0/fsloader-alpine-amd64 \
+    && chmod +x fsloader \
+    && mv fsloader /usr/bin/fsloader \
+    && apk del .build-deps \
+    && apk add --no-cache postgresql-client runit
 
 ADD runit /runit
 ADD fsloader /fsloader
-RUN chmod +x /fsloader/*
 ADD pgbouncer /pgbouncer
-RUN chmod +x /pgbouncer/*
-RUN chmod +x /runit/*
-RUN mkdir -p /etc/service/fsloader
-RUN mkdir -p /etc/service/pgbouncer
-RUN ln -s /fsloader/run /etc/service/fsloader/run
-RUN ln -s /pgbouncer/run /etc/service/pgbouncer/run
-RUN apk --update add runit
-RUN mv /fsloader/fsloader /usr/bin/fsloader
-ENTRYPOINT ["./runit/run_runit.sh"]
+
+RUN chmod +x /fsloader/* \
+    && chmod +x /pgbouncer/* \
+    && chmod +x /runit/* \
+    && mkdir -p /etc/service/fsloader \
+    && mkdir -p /etc/service/pgbouncer \
+    && ln -s /fsloader/run /etc/service/fsloader/run \
+    && ln -s /pgbouncer/run /etc/service/pgbouncer/run
+
+ENTRYPOINT ["/runit/run_runit.sh"]
