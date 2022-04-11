@@ -1,5 +1,7 @@
 FROM alpine:3.10
-ARG PGBOUNCER_VERSION=1.12.0
+ARG PGBOUNCER_VERSION=1.17.0
+
+
 RUN apk add --no-cache libevent openssl c-ares \
     && apk add --no-cache --virtual .build-deps git build-base automake libtool m4 autoconf libevent-dev openssl-dev c-ares-dev \
     && wget https://pgbouncer.github.io/downloads/files/$PGBOUNCER_VERSION/pgbouncer-$PGBOUNCER_VERSION.tar.gz \
@@ -17,16 +19,25 @@ RUN apk add --no-cache libevent openssl c-ares \
     && apk del .build-deps \
     && apk add --no-cache postgresql-client runit
 
+
 ADD runit /runit
 ADD fsloader /fsloader
 ADD pgbouncer /pgbouncer
+
 
 RUN chmod +x /fsloader/* \
     && chmod +x /pgbouncer/* \
     && chmod +x /runit/* \
     && mkdir -p /etc/service/fsloader \
     && mkdir -p /etc/service/pgbouncer \
-    && ln -s /fsloader/run /etc/service/fsloader/run \
+#    && ln -s /fsloader/run /etc/service/fsloader/run \
+#    && ln -s /pgbouncer/run /etc/service/pgbouncer/run
+    && chown -R postgres /fsloader/* /etc/service/fsloader /pgbouncer/* /etc/service/pgbouncer /runit/*
+
+USER postgres
+
+RUN ln -s /fsloader/run /etc/service/fsloader/run \
     && ln -s /pgbouncer/run /etc/service/pgbouncer/run
 
+#USER postgres
 ENTRYPOINT ["/runit/run_runit.sh"]

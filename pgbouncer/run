@@ -1,5 +1,5 @@
 #!/bin/sh -e
 echo "Running PgBouncer"
 #set to default status
-echo RUNNING > /var/run/pgbouncer/pb_status
-exec chpst -u nobody pgbouncer /etc/config/pgbouncer.ini
+echo RUNNING > /etc/service/pgbouncer/pb_status
+exec pgbouncer /etc/config/pgbouncer.ini
