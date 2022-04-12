@@ -13,7 +13,8 @@ RUN apk add --no-cache libevent openssl c-ares \
     && make install \
     && cd .. \
     && rm -Rf pgbouncer-$PGBOUNCER_VERSION* \
-    && wget -O fsloader https://github.com/appscode/fsloader/releases/download/0.1.0/fsloader-alpine-amd64 \
+    && if [[ platform ]]
+    && wget -O fsloader https://github.com/appscode/fsloader/releases/download/0.3.0/fsloader-{FSL_PLATFORM} \
     && chmod +x fsloader \
     && mv fsloader /usr/bin/fsloader \
     && apk del .build-deps \
@@ -30,8 +31,6 @@ RUN chmod +x /fsloader/* \
     && chmod +x /runit/* \
     && mkdir -p /etc/service/fsloader \
     && mkdir -p /etc/service/pgbouncer \
-#    && ln -s /fsloader/run /etc/service/fsloader/run \
-#    && ln -s /pgbouncer/run /etc/service/pgbouncer/run
     && chown -R postgres /fsloader/* /etc/service/fsloader /pgbouncer/* /etc/service/pgbouncer /runit/*
 
 USER postgres
@@ -39,5 +38,4 @@ USER postgres
 RUN ln -s /fsloader/run /etc/service/fsloader/run \
     && ln -s /pgbouncer/run /etc/service/pgbouncer/run
 
-#USER postgres
 ENTRYPOINT ["/runit/run_runit.sh"]
