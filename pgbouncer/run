@@ -1,4 +1,5 @@
 #!/bin/sh -e
+
 echo "Running PgBouncer"
 #set to default status
 echo RUNNING > /etc/service/pgbouncer/pb_status

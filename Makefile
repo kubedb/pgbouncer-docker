@@ -1,34 +1,68 @@
 SHELL=/bin/bash -o pipefail
 
-REGISTRY ?= kubedb
-BIN      := pgbouncer
-IMAGE    := $(REGISTRY)/$(BIN)
-TAG      := $(shell git describe --exact-match --abbrev=0 2>/dev/null || echo "1.17.0")
+REGISTRY   ?= kubedb
+BIN        ?= pgbouncer
+IMAGE      := $(REGISTRY)/$(BIN)
+TAG        ?= $(shell git describe --exact-match --abbrev=0 2>/dev/null || echo "")
 
 DOCKER_PLATFORMS := linux/amd64 linux/arm64
-BIN_PLATFORMS    := $(DOCKER_PLATFORMS) windows/amd64 darwin/amd64 darwin/arm64
-PLATFORM         ?= $(firstword $(BIN_PLATFORMS))
+PLATFORM         ?= linux/$(subst x86_64,amd64,$(subst aarch64,arm64,$(shell uname -m)))
 VERSION          = $(TAG)_$(subst /,_,$(PLATFORM))
 
+container-%:
+	@$(MAKE) container \
+	    --no-print-directory \
+	    PLATFORM=$(subst _,/,$*)
 
-USER_FSL_PLATFORM ?=
-DEFAULT_FSL_PLATFORM ?= linux/arm64
-FSL_PLATFORM ?= $(shell if [ ! -z $(USER_FSL_PLATFORM) ]; then echo $(USER_FSL_PLATFORM)/; fi)
+push-%:
+	@$(MAKE) push \
+	    --no-print-directory \
+	    PLATFORM=$(subst _,/,$*)
 
-.PHONY: push
-push: container
-	docker push $(IMAGE):$(TAG)
+all-container: $(addprefix container-, $(subst /,_,$(DOCKER_PLATFORMS)))
+
+all-push: $(addprefix push-, $(subst /,_,$(DOCKER_PLATFORMS)))
 
 .PHONY: container
 container:
-	@echo "container: $(IMAGE):$(TAG)"                           \
-	sed                                                  \
-	    -e 's|{FSL_PLATFORM}|$(FSL_PLATFORM)|g'               \
-	# ref: https://superuser.com/a/842705
-	tar -czh . | docker buildx build --platform $(PLATFORM) --load --pull -t $(IMAGE):$(TAG) -f Dockerfile -
-	#docker build -t $(IMAGE):$(TAG) .
+	@echo "container: $(IMAGE):$(VERSION)"
+	@docker buildx build --platform $(PLATFORM) --build-arg VERSION=$(TAG) --load --pull -t $(IMAGE):$(VERSION) -f Dockerfile .
 	@echo
+
+push: container
+	@docker push $(IMAGE):$(VERSION)
+	@echo "pushed: $(IMAGE):$(VERSION)"
+	@echo
+
+.PHONY: docker-manifest
+docker-manifest:
+	docker manifest create -a $(IMAGE):$(TAG) $(foreach PLATFORM,$(DOCKER_PLATFORMS),$(IMAGE):$(TAG)_$(subst /,_,$(PLATFORM)))
+	docker manifest push $(IMAGE):$(TAG)
+
+.PHONY: release
+release:
+	@$(MAKE) all-push docker-manifest --no-print-directory
 
 .PHONY: version
 version:
-	@echo ::set-output name=version::$(TAG)
+	@echo ::set-output name=version::$(VERSION)
+
+.PHONY: fmt
+fmt:
+	@find . -path ./vendor -prune -o -name '*.sh' -exec shfmt -l -w -ci -i 4 {} \;
+
+.PHONY: verify
+verify: fmt
+	@if !(git diff --exit-code HEAD); then \
+		echo "files are out of date, run make fmt"; exit 1; \
+	fi
+
+.PHONY: ci
+ci: verify
+
+# make and load docker image to kind cluster
+.PHONY: push-to-kind
+push-to-kind: container
+	@echo "Loading docker image into kind cluster...."
+	@kind load docker-image $(IMAGE):$(VERSION)
+	@echo "Image has been pushed successfully into kind cluster."

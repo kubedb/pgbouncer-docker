@@ -1,30 +1,36 @@
-FROM alpine:3.10
-ARG PGBOUNCER_VERSION=1.17.0
+FROM alpine
 
+ARG TARGETOS
+ARG TARGETARCH
+ARG VERSION
 
-RUN apk add --no-cache libevent openssl c-ares \
+RUN set -x \
+    && apk add --no-cache libevent openssl c-ares ca-certificates \
     && apk add --no-cache --virtual .build-deps git build-base automake libtool m4 autoconf libevent-dev openssl-dev c-ares-dev \
-    && wget https://pgbouncer.github.io/downloads/files/$PGBOUNCER_VERSION/pgbouncer-$PGBOUNCER_VERSION.tar.gz \
-    && tar xzf pgbouncer-$PGBOUNCER_VERSION.tar.gz \
-    && cd pgbouncer-$PGBOUNCER_VERSION \
+    && wget -O pgbouncer.tar.gz https://pgbouncer.github.io/downloads/files/${VERSION}/pgbouncer-${VERSION}.tar.gz \
+    && tar xzf pgbouncer.tar.gz \
+    && cd pgbouncer-${VERSION} \
     && ./autogen.sh \
     && ./configure --prefix=/usr/local --with-libevent=/usr/lib \
     && make \
     && make install \
     && cd .. \
-    && rm -Rf pgbouncer-$PGBOUNCER_VERSION* \
-    && if [[ platform ]]
-    && wget -O fsloader https://github.com/appscode/fsloader/releases/download/0.3.0/fsloader-{FSL_PLATFORM} \
-    && chmod +x fsloader \
-    && mv fsloader /usr/bin/fsloader \
-    && apk del .build-deps \
+    && rm -rf pgbouncer-${VERSION} pgbouncer.tar.gz \
+    && apk del .build-deps
+
+RUN set -x \
     && apk add --no-cache postgresql-client runit
 
+RUN set -x \
+    && wget -O fsloader.tar.gz https://github.com/kubeops/fsloader/releases/download/v0.3.0/fsloader-${TARGETOS}-${TARGETARCH}.tar.gz \
+    && tar xzf fsloader.tar.gz \
+    && chmod +x fsloader-${TARGETOS}-${TARGETARCH} \
+    && mv fsloader-${TARGETOS}-${TARGETARCH} /usr/local/bin/fsloader \
+    && rm -rf LICENSE fsloader.tar.gz
 
 ADD runit /runit
 ADD fsloader /fsloader
 ADD pgbouncer /pgbouncer
-
 
 RUN chmod +x /fsloader/* \
     && chmod +x /pgbouncer/* \
