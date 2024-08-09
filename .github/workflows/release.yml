@@ -35,6 +35,7 @@ jobs:
         id: semver
         run: |
           make version
+          echo "the version value $version and the image $image"
 
       - name: Set up QEMU
         id: qemu
