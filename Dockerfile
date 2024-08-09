@@ -1,21 +1,21 @@
 FROM alpine
 
-ARG TARGETOS=latest
-ARG TARGETARCH=latest
-ARG VERSION=1.23.1
+ARG TARGETOS
+ARG TARGETARCH
+ARG VERSION
 
 RUN set -x \
     && apk add --no-cache libevent openssl c-ares ca-certificates \
     && apk add --no-cache --virtual .build-deps git build-base automake libtool m4 autoconf libevent-dev openssl-dev c-ares-dev \
-    && wget -O pgbouncer.tar.gz https://pgbouncer.github.io/downloads/files/${VERSION}/pgbouncer-${VERSION}.tar.gz \
+    && wget -O pgbouncer.tar.gz https://pgbouncer.github.io/downloads/files/1.23.1/pgbouncer-1.23.1.tar.gz \
     && tar xzf pgbouncer.tar.gz \
-    && cd pgbouncer-${VERSION} \
+    && cd pgbouncer-1.23.1 \
     && ./autogen.sh \
     && ./configure --prefix=/usr/local --with-libevent=/usr/lib \
     && make \
     && make install \
     && cd .. \
-    && rm -rf pgbouncer-${VERSION} pgbouncer.tar.gz \
+    && rm -rf pgbouncer-1.23.1 pgbouncer.tar.gz \
     && apk del .build-deps
 
 RUN set -x \
