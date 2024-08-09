@@ -1,8 +1,8 @@
 FROM alpine
 
-ARG TARGETOS
-ARG TARGETARCH
-ARG VERSION
+ARG TARGETOS=latest
+ARG TARGETARCH=latest
+ARG VERSION=1.23.1
 
 RUN set -x \
     && apk add --no-cache libevent openssl c-ares ca-certificates \
