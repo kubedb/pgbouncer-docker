@@ -50,6 +50,8 @@ version:
 	@echo ::set-output name=VERSION::$(VERSION)
 	@echo "::version=$(VERSION) >> \$$GITHUB_OUTPUT"
 	@echo "::VERSION=$(VERSION) >> \$$GITHUB_OUTPUT"
+	@echo "::version=$(VERSION) >> \$$GITHUB_ENV"
+	@echo "::VERSION=$(VERSION) >> \$$GITHUB_ENV"
 
 
 .PHONY: fmt
