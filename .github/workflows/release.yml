@@ -3,7 +3,6 @@ name: Release
 on:
   push:
     tags:
-      - '1.23'
       - '1.23.1'
   workflow_dispatch:
 
