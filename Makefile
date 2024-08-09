@@ -46,7 +46,8 @@ release:
 
 .PHONY: version
 version:
-	# @echo ::set-output name=version::$(VERSION)
+	@echo ::set-output name=version::$(VERSION)
+	@echo ::set-output name=VERSION::$(VERSION)
 	@echo "::version=$(VERSION) >> \$$GITHUB_OUTPUT"
 	@echo "::VERSION=$(VERSION) >> \$$GITHUB_OUTPUT"
 
