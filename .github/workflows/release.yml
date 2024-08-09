@@ -43,7 +43,7 @@ jobs:
           echo "the version value $version or $VERSION and the image $image"
 
       - name: Debug version
-        run: echo "VERSION=1.23.1"
+        run: echo "VERSION=${version}"
 
       - name: Set up QEMU
         id: qemu
