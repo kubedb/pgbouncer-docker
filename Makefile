@@ -45,7 +45,7 @@ release:
 
 .PHONY: version
 version:
-	@echo "::version=$(VERSION) >> \$$GITHUB_OUTPUT"
+	@echo ::set-output name=version::$(VERSION)
 
 
 .PHONY: fmt
