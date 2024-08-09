@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    branches: [ "release-1.23.1" ]
+    branches: [ "1_23_1" ]
     tags:
       - '*.*'
       - '*.*.*'
