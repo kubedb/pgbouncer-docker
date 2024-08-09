@@ -35,8 +35,9 @@ jobs:
       - name: Print version info
         id: semver
         run: |
+          echo ::version=1.23.1 >> $GITHUB_OUTPUT
           make version
-          echo "the version value $version and the image $image"
+          echo "the version value $version or $VERSION and the image $image"
 
       - name: Set up QEMU
         id: qemu
