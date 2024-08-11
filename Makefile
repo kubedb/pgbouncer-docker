@@ -7,8 +7,7 @@ TAG        ?= $(shell git describe --exact-match --abbrev=0 2>/dev/null || echo 
 
 DOCKER_PLATFORMS := linux/amd64 linux/arm64
 PLATFORM         ?= linux/$(subst x86_64,amd64,$(subst aarch64,arm64,$(shell uname -m)))
-VERSION          = 1.23.1
-# VERSION          = $(TAG)_$(subst /,_,$(PLATFORM))
+VERSION          = $(TAG)_$(subst /,_,$(PLATFORM))
 
 container-%:
 	@$(MAKE) container \
@@ -46,13 +45,7 @@ release:
 
 .PHONY: version
 version:
-	@echo ::set-output name=version::$(VERSION)
-	@echo ::set-output name=VERSION::$(VERSION)
-	@echo "::version=$(VERSION) >> \$$GITHUB_OUTPUT"
-	@echo "::VERSION=$(VERSION) >> \$$GITHUB_OUTPUT"
-	@echo "::version=$(VERSION) >> \$$GITHUB_ENV"
-	@echo "::VERSION=$(VERSION) >> \$$GITHUB_ENV"
-
+	@echo version=$(VERSION)
 
 .PHONY: fmt
 fmt:
