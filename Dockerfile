@@ -1,4 +1,4 @@
-FROM alpine
+FROM alpine:3.20
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -6,8 +6,8 @@ ARG VERSION
 
 RUN set -x \
     && apk add --no-cache libevent openssl c-ares ca-certificates \
-    && apk add --no-cache --virtual .build-deps git build-base automake libtool m4 autoconf libevent-dev openssl-dev c-ares-dev \
-    && wget -O pgbouncer.tar.gz https://pgbouncer.github.io/downloads/files/${VERSION}/pgbouncer-${VERSION}.tar.gz \
+    && apk add --no-cache --virtual .build-deps git build-base automake libtool m4 autoconf libevent-dev openssl-dev c-ares-dev
+RUN wget -O pgbouncer.tar.gz https://pgbouncer.github.io/downloads/files/${VERSION}/pgbouncer-${VERSION}.tar.gz \
     && tar xzf pgbouncer.tar.gz \
     && cd pgbouncer-${VERSION} \
     && ./autogen.sh \

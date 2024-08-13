@@ -12,9 +12,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  label-detector:
+    name: Runner Label
+    runs-on: label-detector
+    outputs:
+      runs-on: ${{ steps.detector.outputs.label }}
+    steps:
+      - name: Detect Label
+        id: detector
+        run: |
+          # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idoutputs
+          echo "label=$(curl -fsSL https://this-is-nats.appscode.ninja/runs-on/${{ github.repository_owner }}?visibility=${{ github.repository_visibility }})" >> $GITHUB_OUTPUT
+
   build:
     name: Build
-    runs-on: ubuntu-20.04
+    needs: label-detector
+    runs-on: "${{ needs.label-detector.outputs.runs-on }}"
     steps:
       - uses: actions/checkout@v1
 
@@ -30,11 +43,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: 1gtm
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Log in to the GitHub Container registry
+        env:
+          REGISTRY: ghcr.io/kubedb
+          DOCKER_TOKEN: ${{ secrets.LGTM_GITHUB_TOKEN }}
+          USERNAME: 1gtm
+        run: |
+          docker login ghcr.io --username ${USERNAME} --password ${DOCKER_TOKEN}
 
       - name: Run checks
         run: |
