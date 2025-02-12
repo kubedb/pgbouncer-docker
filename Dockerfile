@@ -39,6 +39,11 @@ RUN chmod +x /fsloader/* \
     && mkdir -p /etc/service/pgbouncer \
     && chown -R postgres /fsloader/* /etc/service/fsloader /pgbouncer/* /etc/service/pgbouncer /runit/*
 
+RUN chgrp -R 0 /etc/service/fsloader && \
+  chmod -R g=u /etc/service/fsloader
+RUN chgrp -R 0 /etc/service/pgbouncer && \
+  chmod -R g=u /etc/service/pgbouncer
+
 USER postgres
 
 RUN ln -s /fsloader/run /etc/service/fsloader/run \
