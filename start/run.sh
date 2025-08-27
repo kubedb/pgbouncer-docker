@@ -2,9 +2,23 @@
 
 (
   if [ -d "/init" ]; then
-    log "INIT" "Init Directory Exists"
+    echo "Init Directory Exists"
     # Wait for PgBouncer to be ready
-    until pg_isready -h 127.0.0.1 -p 5432; do
+    SSLMODE=$(grep -i "client_tls_sslmode" /etc/config/pgbouncer.ini | cut -c 22-)
+    AUTHTYPE=$(grep -i "auth_type" /etc/config/pgbouncer.ini | cut -c 13-)
+    PASSWORD=$(cat /var/run/pgbouncer/secret/password)
+    USERNAME=$(cat /var/run/pgbouncer/secret/username)
+    if [[ "$SSLMODE" == "verify-full" ]] || [[ "$SSLMODE" == "verify-ca" ]] || [[ "$AUTHTYPE" == "cert" ]]; then
+        args="host=localhost port=$PGBOUNCER_LISTEN_PORT user=$USERNAME password=$PASSWORD sslmode=$SSLMODE sslrootcert=/var/run/pgbouncer/tls/serving/client/ca.crt sslcert=/var/run/pgbouncer/tls/serving/client/tls.crt sslkey=/var/run/pgbouncer/tls/serving/client/tls.key dbname=pgbouncer"
+    elif [[ "$SSLMODE" == "require" ]]; then
+        args="host=localhost port=$PGBOUNCER_LISTEN_PORT user=$USERNAME password=$PASSWORD sslmode=$SSLMODE sslrootcert=/var/run/pgbouncer/tls/serving/client/ca.crt dbname=pgbouncer"
+    else
+        args="host=localhost port=$PGBOUNCER_LISTEN_PORT user=$USERNAME password=$PASSWORD dbname=pgbouncer"
+    fi
+
+    echo "$args"
+
+    until pg_isready -d "$args"; do
       echo "Waiting for PgBouncer to be ready..."
       sleep 2
     done
