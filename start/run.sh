@@ -16,8 +16,6 @@
         args="host=localhost port=$PGBOUNCER_LISTEN_PORT user=$USERNAME password=$PASSWORD dbname=pgbouncer"
     fi
 
-    echo "$args"
-
     until pg_isready -d "$args"; do
       echo "INIT: Waiting for PgBouncer to be ready..."
       sleep 2
