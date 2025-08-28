@@ -2,7 +2,7 @@
 
 (
   if [ -d "/init" ]; then
-    echo "Init Directory Exists"
+    echo "INIT: Init Directory Exists"
     # Wait for PgBouncer to be ready
     SSLMODE=$(grep -i "client_tls_sslmode" /etc/config/pgbouncer.ini | cut -c 22-)
     AUTHTYPE=$(grep -i "auth_type" /etc/config/pgbouncer.ini | cut -c 13-)
@@ -19,14 +19,14 @@
     echo "$args"
 
     until pg_isready -d "$args"; do
-      echo "Waiting for PgBouncer to be ready..."
+      echo "INIT: Waiting for PgBouncer to be ready..."
       sleep 2
     done
-    echo "PgBouncer is ready!"
+    echo "INIT: PgBouncer is ready!"
 
     # Run initialization scripts
-    cd /init || true
-    for file in /init/*
+    cd /init-scripts || true
+    for file in /init-scripts/*
     do
       case "$file" in
         *.sh)
