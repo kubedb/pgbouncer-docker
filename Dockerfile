@@ -31,13 +31,15 @@ RUN set -x \
 ADD runit /runit
 ADD fsloader /fsloader
 ADD pgbouncer /pgbouncer
+ADD start /start
 
 RUN chmod +x /fsloader/* \
     && chmod +x /pgbouncer/* \
     && chmod +x /runit/* \
+    && chmod +x /start/* \
     && mkdir -p /etc/service/fsloader \
     && mkdir -p /etc/service/pgbouncer \
-    && chown -R postgres /fsloader/* /etc/service/fsloader /pgbouncer/* /etc/service/pgbouncer /runit/*
+    && chown -R postgres /fsloader/* /etc/service/fsloader /pgbouncer/* /etc/service/pgbouncer /runit/* /start/*
 
 RUN chgrp -R 0 /etc/service/fsloader && \
   chmod -R g=u /etc/service/fsloader
@@ -49,4 +51,4 @@ USER postgres
 RUN ln -s /fsloader/run /etc/service/fsloader/run \
     && ln -s /pgbouncer/run /etc/service/pgbouncer/run
 
-ENTRYPOINT ["/runit/run_runit.sh"]
+ENTRYPOINT ["/start/run.sh"]
