@@ -15,8 +15,12 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-20.04
+    permissions:
+      packages: write
     steps:
       - uses: actions/checkout@50fbc622fc4ef5163becd7fab6573eac35f8462e # v1.2.0
+        with:
+          fetch-depth: 0
 
       - name: Print version info
         id: semver
@@ -30,11 +34,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f211e3e9ded2d9377c8cadc4489a4e38014bc4c9 # v1.7.0
 
-      - name: Login to DockerHub
+      - name: Log in to the GitHub Container registry
         uses: docker/login-action@dd4fa0671be5250ee6f50aedf4cb05514abda2c7 # v1.14.1
         with:
-          username: 1gtm
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run checks
         run: |
