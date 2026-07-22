@@ -30,6 +30,9 @@ jobs:
     runs-on: "${{ needs.label-detector.outputs.runs-on }}"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-tags: true
+          fetch-depth: 0
 
       - name: Print version info
         id: semver
