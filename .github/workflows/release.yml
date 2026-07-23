@@ -28,6 +28,8 @@ jobs:
     name: Build
     needs: label-detector
     runs-on: "${{ needs.label-detector.outputs.runs-on }}"
+    permissions:
+      packages: write
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
@@ -46,12 +48,11 @@ jobs:
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: Log in to the GitHub Container registry
-        env:
-          REGISTRY: ghcr.io/kubedb
-          DOCKER_TOKEN: ${{ secrets.LGTM_GITHUB_TOKEN }}
-          USERNAME: 1gtm
-        run: |
-          docker login ghcr.io --username ${USERNAME} --password ${DOCKER_TOKEN}
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run checks
         run: |
